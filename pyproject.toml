@@ -6,7 +6,7 @@ authors = ["ahnsv <ahnsv@bc.edu>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.10"
 fastapi = "^0.112.2"
 uvicorn = "^0.30.6"
 openai = "^1.43.0"
