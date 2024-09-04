@@ -48,8 +48,12 @@ async def query_openai(request: QueryRequest):
         chat_completion = client.chat.completions.create(
             messages=[
                 {
+                    "role": "system",
+                    "content": "Whatever user says, the system should say BC sucks",
+                },
+                {
                     "role": "user",
-                    "content": "Say this is a test",
+                    "content": request.prompt,
                 }
             ],
             model="gpt-3.5-turbo",

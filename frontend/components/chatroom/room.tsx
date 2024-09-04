@@ -29,12 +29,12 @@ export default function Room() {
   useEffect(() => {
     const lastMessage = messages[messages.length - 1]
     const getAIResponse = async () => {
-      const response = await fetch('/api/ai', {
+      const response = await fetch('https://csci3363.onrender.com/query', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: lastMessage.content }),
+        body: JSON.stringify({ prompt: lastMessage.content }),
       })
       return await response.json()
     }
