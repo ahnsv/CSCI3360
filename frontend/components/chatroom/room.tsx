@@ -4,7 +4,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { SendIcon } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 type Message = {
   author: string
@@ -26,6 +26,32 @@ export default function Room() {
     ])
     setInput('')
   }
+  useEffect(() => {
+    const lastMessage = messages[messages.length - 1]
+    const getAIResponse = async () => {
+      const response = await fetch('/api/ai', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: lastMessage.content }),
+      })
+      return await response.json()
+    }
+    if (lastMessage.author === 'Me') {
+      getAIResponse().then((aiResponse) => {
+        setMessages((messages) => [
+          ...messages,
+          aiResponse.message.trim() === '' ? { author: 'AI', content: 'I didn\'t get that. Could you try again?' } : { author: 'AI', content: aiResponse.message },
+        ])
+      }).catch(() => {
+        setMessages((messages) => [
+          ...messages,
+          { author: 'AI', content: 'I didn\'t get that. Could you try again?' },
+        ])
+      })
+    }
+  }, [messages])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Backspace') {
