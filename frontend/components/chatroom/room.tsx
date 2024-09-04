@@ -74,6 +74,10 @@ export default function Room() {
 
   return (
     <div className="flex flex-col h-screen max-w-full mx-auto">
+      <div className="flex items-center justify-between p-4 bg-background rounded-t-lg shadow-sm">
+        <h1 className="text-lg font-bold text-card-foreground">CSCI3360 Chatroom Demo</h1>
+        <Button onClick={() => setMessages(INITIAL_MESSAGES)}>Clear Chat</Button>
+      </div>
       <div className="flex-1 overflow-auto p-4 space-y-4">
         {messages.map((message, index) => (
           <div key={index} className={`flex items-center gap-4 ${message.author !== 'AI' && 'justify-end'}`}>
