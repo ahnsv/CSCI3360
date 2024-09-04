@@ -22,7 +22,7 @@ export default function Room() {
     if (input.trim() === '') return
     setMessages((messages) => [
       ...messages,
-      input.trim() === '' ? { author: 'AI', content: 'I didn\'t get that. Could you try again?' } : { author: 'Me', content: input },
+      { author: 'Me', content: input },
     ])
     setInput('')
   }
@@ -40,9 +40,10 @@ export default function Room() {
     }
     if (lastMessage.author === 'Me') {
       getAIResponse().then((aiResponse) => {
+        // TODO: change response schema
         setMessages((messages) => [
           ...messages,
-          aiResponse.message.trim() === '' ? { author: 'AI', content: 'I didn\'t get that. Could you try again?' } : { author: 'AI', content: aiResponse.message },
+          aiResponse.response.trim() === '' ? { author: 'AI', content: 'I didn\'t get that. Could you try again?' } : { author: 'AI', content: aiResponse.response },
         ])
       }).catch(() => {
         setMessages((messages) => [
