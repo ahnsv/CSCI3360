@@ -3,8 +3,9 @@
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
-import { SendIcon } from "lucide-react"
+import { Loader2, SendIcon } from "lucide-react"
 import { useEffect, useState } from "react"
+import { Skeleton } from "../ui/skeleton";
 
 type Message = {
   author: string
@@ -18,6 +19,8 @@ const INITIAL_MESSAGES: Message[] = [
 export default function Room() {
   const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES)
   const [input, setInput] = useState('')
+  const [loading, setLoading] = useState(false)
+
   const handleSend = () => {
     if (input.trim() === '') return
     setMessages((messages) => [
@@ -35,17 +38,21 @@ export default function Room() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ prompt: lastMessage.content }),
+        signal: AbortSignal.timeout(5000),
       })
       return await response.json()
     }
     if (lastMessage.author === 'Me') {
+      setLoading(true)
       getAIResponse().then((aiResponse) => {
+        setLoading(false)
         // TODO: change response schema
         setMessages((messages) => [
           ...messages,
           aiResponse.response.trim() === '' ? { author: 'AI', content: 'I didn\'t get that. Could you try again?' } : { author: 'AI', content: aiResponse.response },
         ])
       }).catch(() => {
+        setLoading(false)
         setMessages((messages) => [
           ...messages,
           { author: 'AI', content: 'I didn\'t get that. Could you try again?' },
@@ -54,22 +61,16 @@ export default function Room() {
     }
   }, [messages])
 
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    e.preventDefault()
+    setInput(e.target.value)
+  }
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Backspace') {
-      setInput(currentInput => currentInput.slice(0, -1))
-      return
-    }
-
-    if (e.shiftKey || e.metaKey || e.altKey || e.ctrlKey) return
-
-    if (e.key === 'Enter') {
-      handleSend()
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      setInput('')
-      return
+      handleSend()
     }
-
-    setInput(currentInput => currentInput + e.key)
   }
 
 
@@ -106,19 +107,39 @@ export default function Room() {
             }
           </div>
         ))}
+        {
+          loading && (
+            <div className="flex items-center gap-4">
+              <Skeleton className="h-12 w-12 rounded-full" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-[250px]" />
+                <Skeleton className="h-4 w-[200px]" />
+              </div>
+            </div>
+          )
+        }
       </div>
       <div className="flex items-start gap-2 p-4 bg-background rounded-lg shadow-sm">
         <Textarea
           placeholder="Type your message..."
           className="flex-1 resize-none focus:ring-0 focus:outline-none"
+          onChange={handleChange}
           onKeyDown={handleKeyDown}
           value={input}
           rows={1}
         />
-        <Button onClick={handleSend}>
-          <SendIcon className="w-5 h-5" />
-          <span className="sr-only">Send</span>
-        </Button>
+        {loading ? (
+          // Show loading spinner
+          <Button disabled>
+            <Loader2 className="w-5 h-5 animate-spin" />
+          </Button>
+        ) : (
+          <Button onClick={handleSend}>
+            <SendIcon className="w-5 h-5" />
+            <span className="sr-only">Send</span>
+          </Button>
+        )
+        }
       </div>
     </div>
   )
