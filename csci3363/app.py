@@ -1,12 +1,15 @@
+import csv
 import os
+from io import StringIO
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from openai import OpenAI
 from pydantic import BaseModel
-from starlette.responses import FileResponse
+from starlette import status
+from starlette.responses import FileResponse, JSONResponse
 
 # Load environment variables from .env file
 load_dotenv()
@@ -41,6 +44,9 @@ class QueryResponse(BaseModel):
     response: str
 
 
+in_memory_datastore = []
+
+
 # Endpoint to interact with OpenAI API via LangChain
 @app.post("/query", response_model=QueryResponse)
 async def query_openai(request: QueryRequest):
@@ -71,3 +77,33 @@ async def query_openai(request: QueryRequest):
 @app.get("/")
 async def read_root():
     return FileResponse('static/index.html')
+
+
+@app.post("/upload", response_model=QueryResponse)
+async def upload_query(file: UploadFile = File(..., )):
+    if not file.filename.endswith('.csv'):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File should be .csv")
+
+    if file.size > 1 * 1024 * 1024:  # NOTE: hard limit 1MB
+        raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                            detail="File is too large (limit: 1MB)")
+
+    # parse csv
+    data = []
+
+    # read file as bytes and decode bytes into text stream
+    file_bytes = file.file.read()
+    buffer = StringIO(file_bytes.decode('utf-8'))
+    # process CSV
+    csvReader = csv.DictReader(buffer)
+    data = [row for row in csvReader]
+
+    buffer.close()
+    file.file.close()
+
+    in_memory_datastore.clear()
+    in_memory_datastore.append(data)
+
+    return JSONResponse(content={
+        "message": "Memory updated"
+    })
