@@ -47,7 +47,7 @@ class QueryResponse(BaseModel):
 
 
 class QueryDataRequest(BaseModel):
-    question: str
+    prompt: str
 
 
 class QueryDataResponse(BaseModel):
@@ -146,7 +146,7 @@ async def query_data(request: QueryDataRequest):
                 },
                 {
                     "role": "user",
-                    "content": request.question,
+                    "content": request.prompt,
                 }
             ],
             model="gpt-3.5-turbo",
