@@ -109,11 +109,16 @@ async def upload_query(file: UploadFile = File(..., )):
     file.file.close()
 
     in_memory_datastore.clear()
-    in_memory_datastore.append(data)
+    in_memory_datastore.extend(data)
 
     return JSONResponse(content={
         "message": "Memory updated"
     })
+
+
+@app.get("/current-data")
+async def get_current_data():
+    return JSONResponse(in_memory_datastore[:10])
 
 
 @app.post("/query-data", response_model=QueryDataResponse)
