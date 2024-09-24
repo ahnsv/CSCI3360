@@ -13,6 +13,26 @@ openai = "^1.43.0"
 python-dotenv = "^1.0.1"
 
 
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.6.7"
+
+[tool.ruff]
+target-version = "py310"
+
+[tool.ruff.lint]
+extend-select = ["I", "UP", "T20"]
+ignore = [
+    "F841", # remove unused variables
+]
+
+[tool.ruff.lint.per-file-ignores]
+"migrations/*" = [
+    "F401", # remove unused import
+]
+"scripts/*" = [
+    "T20"
+]
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

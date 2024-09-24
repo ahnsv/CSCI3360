@@ -1,11 +1,12 @@
-from fastapi import FastAPI, HTTPException
-from fastapi.staticfiles import StaticFiles
-from starlette.responses import FileResponse
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from openai import OpenAI
 import os
+
 from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from openai import OpenAI
+from pydantic import BaseModel
+from starlette.responses import FileResponse
 
 # Load environment variables from .env file
 load_dotenv()
@@ -30,19 +31,21 @@ client = OpenAI(
     api_key=os.environ.get("OPENAI_API_KEY"),
 )
 
+
 # Define request and response models
 class QueryRequest(BaseModel):
     prompt: str
 
+
 class QueryResponse(BaseModel):
     response: str
+
 
 # Endpoint to interact with OpenAI API via LangChain
 @app.post("/query", response_model=QueryResponse)
 async def query_openai(request: QueryRequest):
     try:
         # Set your OpenAI API key
-        
 
         # Call the OpenAI API via LangChain
         chat_completion = client.chat.completions.create(
@@ -62,6 +65,7 @@ async def query_openai(request: QueryRequest):
         return QueryResponse(response=chat_completion.choices[0].message.content)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 # Root endpoint
 @app.get("/")
