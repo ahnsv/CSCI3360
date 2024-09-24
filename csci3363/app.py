@@ -1,4 +1,5 @@
 import csv
+import json
 import os
 from io import StringIO
 
@@ -6,7 +7,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from openai import OpenAI
+from openai import OpenAI, BadRequestError
 from pydantic import BaseModel
 from starlette import status
 from starlette.responses import FileResponse, JSONResponse
@@ -41,6 +42,14 @@ class QueryRequest(BaseModel):
 
 
 class QueryResponse(BaseModel):
+    response: str
+
+
+class QueryDataRequest(BaseModel):
+    question: str
+
+
+class QueryDataResponse(BaseModel):
     response: str
 
 
@@ -88,12 +97,10 @@ async def upload_query(file: UploadFile = File(..., )):
         raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
                             detail="File is too large (limit: 1MB)")
 
-    # parse csv
-    data = []
-
     # read file as bytes and decode bytes into text stream
     file_bytes = file.file.read()
     buffer = StringIO(file_bytes.decode('utf-8'))
+
     # process CSV
     csvReader = csv.DictReader(buffer)
     data = [row for row in csvReader]
@@ -107,3 +114,34 @@ async def upload_query(file: UploadFile = File(..., )):
     return JSONResponse(content={
         "message": "Memory updated"
     })
+
+
+@app.post("/query-data", response_model=QueryDataResponse)
+async def query_data(request: QueryDataRequest):
+    if not in_memory_datastore:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No data")
+
+    analyze_sys_prompt = open('csci3363/prompts/analyze.txt').read()
+    analyze_sys_prompt = analyze_sys_prompt % (json.dumps(in_memory_datastore))
+
+    try:
+        chat_completion = client.chat.completions.create(
+            messages=[
+                {
+                    "role": "system",
+                    "content": analyze_sys_prompt,
+                },
+                {
+                    "role": "user",
+                    "content": request.question,
+                }
+            ],
+            model="gpt-3.5-turbo",
+            response_format={
+                "type": "json_object"
+            }
+        )
+    except BadRequestError as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=e.message)
+
+    return QueryResponse(response=chat_completion.choices[0].message.content)
