@@ -118,6 +118,8 @@ async def upload_query(file: UploadFile = File(..., )):
 
 @app.get("/current-data")
 async def get_current_data():
+    if not in_memory_datastore:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No data")
     return JSONResponse(in_memory_datastore[:10])
 
 
