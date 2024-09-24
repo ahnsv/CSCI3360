@@ -12,6 +12,7 @@ uvicorn = "^0.30.6"
 openai = "^1.43.0"
 python-dotenv = "^1.0.1"
 python-multipart = "^0.0.10"
+pandas = "^2.2.3"
 
 
 [tool.poetry.group.dev.dependencies]

@@ -1,6 +1,7 @@
 import csv
 import json
 import os
+import pandas as pd
 from io import StringIO
 
 from dotenv import load_dotenv
@@ -128,8 +129,13 @@ async def query_data(request: QueryDataRequest):
     if not in_memory_datastore:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No data")
 
+    df = pd.DataFrame(in_memory_datastore)
+    columns = df.columns
+    types = df.dtypes.apply(lambda x: str(x)).to_dict()
+    sample = df.head(10).to_dict(orient="records")
+
     analyze_sys_prompt = open('csci3363/prompts/analyze.txt').read()
-    analyze_sys_prompt = analyze_sys_prompt % (json.dumps(in_memory_datastore))
+    analyze_sys_prompt = analyze_sys_prompt % (columns, types, sample)
 
     try:
         chat_completion = client.chat.completions.create(
@@ -151,4 +157,6 @@ async def query_data(request: QueryDataRequest):
     except BadRequestError as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=e.message)
 
-    return QueryResponse(response=chat_completion.choices[0].message.content)
+    response_json = json.loads(chat_completion.choices[0].message.content)
+
+    return JSONResponse(response_json)

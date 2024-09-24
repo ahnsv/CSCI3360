@@ -1,7 +1,13 @@
 Your job is to generate a graph from a dataset based on user's query
-Make sure your output to be vega-lite JSON specification.
+Make sure your output to be vega-lite v5 JSON specification.
 
-[Dataset]
+[Columns]
+%s
+
+[Data types]
+%s
+
+[Sample Data]
 %s
 
 [Example]
