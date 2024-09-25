@@ -7,8 +7,9 @@ import React, {useEffect, useState} from "react"
 import {TopLevelSpec} from "vega-lite";
 import MessageBubble from "@/components/ui/messagebubble";
 import MessageSkeleton from "@/components/ui/messageskeleton";
+import CSVUploader from "@/components/ui/csvuploader";
 
-const API_ENDPOINT = process.env.NEXT_PUBLIC_API_ENDPOINT!
+export const API_ENDPOINT = process.env.NEXT_PUBLIC_API_ENDPOINT!
 
 type Message = {
     author: string
@@ -44,7 +45,7 @@ export default function Room() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({prompt: lastMessage.content}),
-                signal: AbortSignal.timeout(10000),
+                signal: AbortSignal.timeout(30000),
             })
             if (!response.ok) {
                 throw new Error("Cannot get api response")
@@ -122,6 +123,7 @@ export default function Room() {
                 <h1 className="text-lg font-bold text-card-foreground">CSCI3360 Chatroom Demo</h1>
                 <Button onClick={() => setMessages(INITIAL_MESSAGES)}>Clear Chat</Button>
             </div>
+            <CSVUploader />
             <div className="flex-1 overflow-auto p-4 space-y-4">
                 <MessageContent/>
             </div>
