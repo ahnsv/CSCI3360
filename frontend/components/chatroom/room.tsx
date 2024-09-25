@@ -8,6 +8,7 @@ import React, {useEffect, useState} from "react"
 import {Skeleton} from "../ui/skeleton";
 import {TopLevelSpec} from "vega-lite";
 import VegaChart from "@/components/ui/vegachart";
+import MessageBubble from "@/components/ui/messagebubble";
 
 const API_ENDPOINT = process.env.NEXT_PUBLIC_API_ENDPOINT!
 
@@ -110,37 +111,7 @@ export default function Room() {
             </div>
             <div className="flex-1 overflow-auto p-4 space-y-4">
                 {messages.map((message, index) => (
-                    <div key={index} className={`flex items-center gap-4 ${message.author !== 'AI' && 'justify-end'}`}>
-                        {message.author === 'AI' ? ( // Show AI avatar on the left
-                            <>
-                                <Avatar className="w-8 h-8 border">
-                                    <AvatarImage src="/placeholder-user.jpg" alt="User Avatar"/>
-                                    <AvatarFallback>{message.author}</AvatarFallback>
-                                </Avatar>
-                                {
-                                    message?.content && (
-                                        <div className="bg-card rounded-lg p-3 max-w-[70%] border">
-                                            <p className="text-sm text-card-foreground">{message?.content}</p>
-                                        </div>
-                                    )
-                                }
-                                {message?.attachment && (
-                                    <VegaChart spec={message.attachment}/>
-                                )}
-                            </>
-                        ) : ( // Show user avatar on the right
-                            <>
-                                <div className="bg-card rounded-lg p-3 max-w-[70%] border">
-                                    <p className="text-sm text-card-foreground">{message?.content}</p>
-                                </div>
-                                <Avatar className="w-8 h-8 border">
-                                    <AvatarImage src="/placeholder-user.jpg" alt="User Avatar"/>
-                                    <AvatarFallback>{message.author}</AvatarFallback>
-                                </Avatar>
-                            </>
-                        )
-                        }
-                    </div>
+                    <MessageBubble {...message} key={index}/>
                 ))}
                 {
                     loading && (
