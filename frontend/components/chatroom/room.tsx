@@ -1,14 +1,12 @@
 'use client';
 
-import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar"
 import {Textarea} from "@/components/ui/textarea"
 import {Button} from "@/components/ui/button"
 import {Loader2, SendIcon} from "lucide-react"
 import React, {useEffect, useState} from "react"
-import {Skeleton} from "../ui/skeleton";
 import {TopLevelSpec} from "vega-lite";
-import VegaChart from "@/components/ui/vegachart";
 import MessageBubble from "@/components/ui/messagebubble";
+import MessageSkeleton from "@/components/ui/messageskeleton";
 
 const API_ENDPOINT = process.env.NEXT_PUBLIC_API_ENDPOINT!
 
@@ -102,6 +100,21 @@ export default function Room() {
         }
     }
 
+    const MessageContent = () => {
+        return (
+            <>
+                {
+                    messages.map((message, index) => (
+                        <MessageBubble {...message} key={index}/>
+                    ))
+                }
+                {
+                    loading && <MessageSkeleton/>
+                }
+            </>
+        )
+    }
+
 
     return (
         <div className="flex flex-col h-screen max-w-full mx-auto">
@@ -110,20 +123,7 @@ export default function Room() {
                 <Button onClick={() => setMessages(INITIAL_MESSAGES)}>Clear Chat</Button>
             </div>
             <div className="flex-1 overflow-auto p-4 space-y-4">
-                {messages.map((message, index) => (
-                    <MessageBubble {...message} key={index}/>
-                ))}
-                {
-                    loading && (
-                        <div className="flex items-center gap-4">
-                            <Skeleton className="h-12 w-12 rounded-full"/>
-                            <div className="space-y-2">
-                                <Skeleton className="h-4 w-[250px]"/>
-                                <Skeleton className="h-4 w-[200px]"/>
-                            </div>
-                        </div>
-                    )
-                }
+                <MessageContent/>
             </div>
             <div className="flex items-start gap-2 p-4 bg-background rounded-lg shadow-sm">
                 <Textarea
