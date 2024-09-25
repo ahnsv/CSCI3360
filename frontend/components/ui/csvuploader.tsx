@@ -32,8 +32,12 @@ const uploadFileAndGetCurrentData = async (file: File) => {
     return await getCurrentDataResponse.json() as Record<string, unknown>[]
 }
 
-export default function CSVUploader() {
-    const [preview, setPreview] = useState<any[] | null>(null)
+type CSVUploaderProps = {
+    show: boolean;
+    samples: unknown[]
+}
+export default function CSVUploader({show, samples}: CSVUploaderProps) {
+    const [preview, setPreview] = useState<any[] | null>(samples)
     const [error, setError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
     const [isPreviewVisible, setIsPreviewVisible] = useState(true)
@@ -92,6 +96,10 @@ export default function CSVUploader() {
         setIsPreviewVisible(!isPreviewVisible)
     }
 
+    if (!show) {
+        return <></>
+    }
+
     return (
         <div className="max-w-4xl mx-auto p-4">
             <div
@@ -127,6 +135,11 @@ export default function CSVUploader() {
 
             {preview && (
                 <div className="mt-8 flex flex-col mx-auto">
+                    <p className={`tracking-tighter my-4 mx-auto font-bold`}>
+                        There is an existing data. <br />
+                        You can use the existing data or upload new one by drag and drop or
+                        clicking the area above.
+                    </p>
                     <Button
                         variant="outline"
                         size="sm"
@@ -172,17 +185,6 @@ export default function CSVUploader() {
                     )}
                 </div>
             )}
-
-            {/*{preview && (*/}
-            {/*    <div className="mt-4 text-center">*/}
-            {/*        <Button onClick={() => {*/}
-            {/*            setPreview(null);*/}
-            {/*            setError(null);*/}
-            {/*        }}>*/}
-            {/*            Upload Another File*/}
-            {/*        </Button>*/}
-            {/*    </div>*/}
-            {/*)}*/}
         </div>
     )
 }
