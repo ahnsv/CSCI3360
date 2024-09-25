@@ -1,17 +1,20 @@
 'use client';
 
-import {Avatar, AvatarImage, AvatarFallback} from "@/components/ui/avatar"
+import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar"
 import {Textarea} from "@/components/ui/textarea"
 import {Button} from "@/components/ui/button"
 import {Loader2, SendIcon} from "lucide-react"
-import {useEffect, useState} from "react"
+import React, {useEffect, useState} from "react"
 import {Skeleton} from "../ui/skeleton";
+import {TopLevelSpec} from "vega-lite";
+import VegaChart from "@/components/ui/vegachart";
 
 const API_ENDPOINT = process.env.NEXT_PUBLIC_API_ENDPOINT!
 
 type Message = {
     author: string
-    content: string
+    content?: string
+    attachment?: TopLevelSpec
 }
 
 const INITIAL_MESSAGES: Message[] = [
@@ -34,7 +37,7 @@ export default function Room() {
     useEffect(() => {
         const lastMessage = messages[messages.length - 1]
         const getAIResponse = async () => {
-            const isQueryData = lastMessage.content.startsWith("/query")
+            const isQueryData = lastMessage?.content?.startsWith("/query")
             const url = `${API_ENDPOINT}/${isQueryData ? 'query-data' : 'query'}`
             const response = await fetch(url, {
                 method: 'POST',
@@ -42,9 +45,9 @@ export default function Room() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({prompt: lastMessage.content}),
-                signal: AbortSignal.timeout(5000),
+                signal: AbortSignal.timeout(10000),
             })
-            if (response.ok) {
+            if (!response.ok) {
                 throw new Error("Cannot get api response")
             }
             return await response.json()
@@ -54,12 +57,22 @@ export default function Room() {
         }
         setLoading(true)
         getAIResponse().then((aiResponse) => {
-            if (!aiResponse?.message) {
+            if (!aiResponse?.response) {
                 setLoading(false)
                 return
             }
             setLoading(false)
-            // TODO: change response schema
+            const response = aiResponse.response
+            if (response instanceof Object) {
+                setMessages(
+                    messages => [...messages, {
+                        author: 'AI',
+                        content: '',
+                        attachment: response as TopLevelSpec
+                    }]
+                )
+                return
+            }
             setMessages((messages) => [
                 ...messages,
                 aiResponse.response.trim() === '' ? {
@@ -104,14 +117,21 @@ export default function Room() {
                                     <AvatarImage src="/placeholder-user.jpg" alt="User Avatar"/>
                                     <AvatarFallback>{message.author}</AvatarFallback>
                                 </Avatar>
-                                <div className="bg-card rounded-lg p-3 max-w-[70%] border">
-                                    <p className="text-sm text-card-foreground">{message.content}</p>
-                                </div>
+                                {
+                                    message?.content && (
+                                        <div className="bg-card rounded-lg p-3 max-w-[70%] border">
+                                            <p className="text-sm text-card-foreground">{message?.content}</p>
+                                        </div>
+                                    )
+                                }
+                                {message?.attachment && (
+                                    <VegaChart spec={message.attachment}/>
+                                )}
                             </>
                         ) : ( // Show user avatar on the right
                             <>
                                 <div className="bg-card rounded-lg p-3 max-w-[70%] border">
-                                    <p className="text-sm text-card-foreground">{message.content}</p>
+                                    <p className="text-sm text-card-foreground">{message?.content}</p>
                                 </div>
                                 <Avatar className="w-8 h-8 border">
                                     <AvatarImage src="/placeholder-user.jpg" alt="User Avatar"/>

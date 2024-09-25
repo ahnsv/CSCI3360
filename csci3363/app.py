@@ -159,4 +159,4 @@ async def query_data(request: QueryDataRequest):
 
     response_json = json.loads(chat_completion.choices[0].message.content)
 
-    return JSONResponse(response_json)
+    return JSONResponse({'response': response_json})
