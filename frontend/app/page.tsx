@@ -5,6 +5,7 @@ async function getCurrentData() {
     const response = await fetch(`${API_ENDPOINT}/current-data`)
     if (!response.ok) {
         console.error('no current data')
+        return new Array([])
     }
     return await response.json()
 }
