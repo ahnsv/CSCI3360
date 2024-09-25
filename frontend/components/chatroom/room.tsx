@@ -2,13 +2,14 @@
 
 import {Textarea} from "@/components/ui/textarea"
 import {Button} from "@/components/ui/button"
-import {Loader2, SendIcon} from "lucide-react"
+import {Loader2, SendIcon, Terminal} from "lucide-react"
 import React, {useEffect, useState} from "react"
 import {TopLevelSpec} from "vega-lite";
 import MessageBubble from "@/components/ui/messagebubble";
 import MessageSkeleton from "@/components/ui/messageskeleton";
 import CSVUploader from "@/components/ui/csvuploader";
 import {API_ENDPOINT} from "@/app/constants";
+import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert";
 
 type Message = {
     author: string
@@ -138,6 +139,13 @@ export default function Room({contextData}: RoomProps) {
                     <Button onClick={() => setMessages(INITIAL_MESSAGES)}>Clear Chat</Button>
                 </div>
             </div>
+            <Alert variant={`default`}>
+                <Terminal className="h-4 w-4"/>
+                <AlertTitle>Heads up!</AlertTitle>
+                <AlertDescription className={`font-bold`}>
+                    Use `/query` command to talk about data you upload.
+                </AlertDescription>
+            </Alert>
             <CSVUploader show={showUploader} samples={contextData}/>
             <div className="flex-1 overflow-auto p-4 space-y-4">
                 <MessageContent/>
