@@ -76,6 +76,15 @@ export default function Room({contextData}: RoomProps) {
             setLoading(false)
             const response = aiResponse.response
             if (response instanceof Object) {
+                if (response?.error) {
+                    setMessages(
+                        messages => [...messages, {
+                            author: 'AI',
+                            content: response.error,
+                        }]
+                    )
+                    return
+                }
                 setMessages(
                     messages => [...messages, {
                         author: 'AI',

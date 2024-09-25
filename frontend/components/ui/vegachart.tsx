@@ -7,7 +7,6 @@ type VegaChartProps = {
 }
 
 const VegaChart: React.FC<VegaChartProps> = ({spec}) => {
-    console.log(spec)
     return (
         <div>
             <VegaLite spec={spec}/>
