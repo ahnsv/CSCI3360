@@ -160,3 +160,9 @@ async def query_data(request: QueryDataRequest):
     response_json = json.loads(chat_completion.choices[0].message.content)
 
     return JSONResponse({'response': response_json})
+
+
+@app.post('/clear')
+async def clear_data():
+    in_memory_datastore.clear()
+    return JSONResponse({'message': 'Memory cleared'})
