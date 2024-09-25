@@ -8,8 +8,7 @@ import {TopLevelSpec} from "vega-lite";
 import MessageBubble from "@/components/ui/messagebubble";
 import MessageSkeleton from "@/components/ui/messageskeleton";
 import CSVUploader from "@/components/ui/csvuploader";
-
-export const API_ENDPOINT = process.env.NEXT_PUBLIC_API_ENDPOINT!
+import {API_ENDPOINT} from "@/app/constants";
 
 type Message = {
     author: string
@@ -21,7 +20,11 @@ const INITIAL_MESSAGES: Message[] = [
     {author: 'AI', content: 'Hey there! How\'s it going?'},
 ]
 
-export default function Room() {
+type RoomProps = {
+    contextData: unknown[]
+}
+
+export default function Room({contextData}: RoomProps) {
     const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES)
     const [input, setInput] = useState('')
     const [loading, setLoading] = useState(false)
@@ -35,6 +38,13 @@ export default function Room() {
         ])
         setInput('')
     }
+
+    useEffect(() => {
+        if (!!contextData) {
+            console.log('it does have current data')
+        }
+    }, [contextData]);
+
     useEffect(() => {
         const lastMessage = messages[messages.length - 1]
         const getAIResponse = async () => {

@@ -6,7 +6,8 @@ import {Upload, FileText, AlertCircle, ChevronDown, ChevronUp} from 'lucide-reac
 import {Button} from "@/components/ui/button"
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table"
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert"
-import {API_ENDPOINT} from "@/components/chatroom/room";
+
+import {API_ENDPOINT} from "@/app/constants";
 
 // Mock function to simulate backend processing
 const uploadFileAndGetCurrentData = async (file: File) => {
