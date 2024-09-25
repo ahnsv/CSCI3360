@@ -25,6 +25,7 @@ export default function Room() {
     const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES)
     const [input, setInput] = useState('')
     const [loading, setLoading] = useState(false)
+    const [showUploader, setShowUploader] = useState(false)
 
     const handleSend = () => {
         if (input.trim() === '') return
@@ -121,9 +122,17 @@ export default function Room() {
         <div className="flex flex-col h-screen max-w-full mx-auto">
             <div className="flex items-center justify-between p-4 bg-background rounded-t-lg shadow-sm">
                 <h1 className="text-lg font-bold text-card-foreground">CSCI3360 Chatroom Demo</h1>
-                <Button onClick={() => setMessages(INITIAL_MESSAGES)}>Clear Chat</Button>
+                <div className="actions space-x-1">
+                    <Button onClick={() => setShowUploader(state => !state)}
+                            className={`bg-amber-400 hover:bg-amber-700`}>Upload file</Button>
+                    <Button onClick={() => setMessages(INITIAL_MESSAGES)}>Clear Chat</Button>
+                </div>
             </div>
-            <CSVUploader />
+            {
+                showUploader && (
+                    <CSVUploader/>
+                )
+            }
             <div className="flex-1 overflow-auto p-4 space-y-4">
                 <MessageContent/>
             </div>

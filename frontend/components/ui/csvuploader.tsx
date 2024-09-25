@@ -9,18 +9,6 @@ import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert"
 import {API_ENDPOINT} from "@/components/chatroom/room";
 
 // Mock function to simulate backend processing
-const mockBackendProcess = (file: File): Promise<any[]> => {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve([
-                {id: 1, name: 'John Doe', email: 'john@example.com'},
-                {id: 2, name: 'Jane Smith', email: 'jane@example.com'},
-                {id: 3, name: 'Bob Johnson', email: 'bob@example.com'},
-            ])
-        }, 1000)
-    })
-}
-
 const uploadFileAndGetCurrentData = async (file: File) => {
     const formData = new FormData()
     formData.append('file', file)
