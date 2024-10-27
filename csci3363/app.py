@@ -2,6 +2,7 @@ import csv
 import json
 import os
 from functools import partial
+from typing import Optional
 
 import pandas as pd
 from io import StringIO
@@ -167,7 +168,12 @@ async def query_data(request: QueryDataRequest):
     return JSONResponse({'response': response_json})
 
 
-@app.post("/query-data-v2")
+class QueryDataV2Response(BaseModel):
+    text: str
+    vega: Optional[dict]
+
+
+@app.post("/query-data-v2", response_model=QueryDataV2Response)
 async def query_data_v2(request: QueryDataRequest):
     if not in_memory_datastore:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No data")
@@ -182,16 +188,22 @@ async def query_data_v2(request: QueryDataRequest):
 
     execute_sql = partial(execute_sql_query, data=in_memory_datastore)
     visualize_result = partial(visualize_result_in_vega, client=client)
+
     tools = [function_to_schema(execute_sql), function_to_schema(visualize_result)]
     tool_map = {
         "execute_sql_query": execute_sql,
         "visualize_result_in_vega": visualize_result
     }
-    result = query(client, request.prompt, analyze_sys_prompt, tools, tool_map)
+    result = query(client, request.prompt, analyze_sys_prompt, tools, tool_map, max_iterations=3)
     if not result:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="No response from AI")
 
-    return JSONResponse({'response': result})
+    try:
+        json_result = json.loads(result)
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Invalid JSON response")
+
+    return json_result
 
 
 @app.post('/clear')

@@ -30,13 +30,14 @@ def query(client: OpenAI, question: str, system_prompt: str, tools: list[dict], 
         print("iteration:", i)
         response = client.chat.completions.create(
             model="gpt-4o-mini", temperature=0.0, messages=messages, tools=tools,
-            tool_choice="required",
-            response_format={"type": "json_object"}
+            tool_choice="auto",
+            # response_format={"type": "json_object"}
         )
         # print(response.choices[0].message)
         if response.choices[0].message.content is not None:
             print_red(response.choices[0].message.content)
-        # print(response.choices[0].message)
+            # print(response.choices[0].message)
+            break
 
         # if not function call
         if response.choices[0].message.tool_calls is None:
@@ -93,6 +94,18 @@ def function_to_schema(func: Callable[..., Any]) -> dict:
             f"Failed to get signature for function {original_func.__name__}: {str(e)}"
         )
 
+    docstring = original_func.__doc__ or ""
+    param_descriptions = {}
+    if docstring:
+        for line in docstring.split("\n"):
+            line = line.strip()
+            if line.startswith(":param"):
+                parts = line.split(":", 2)
+                if len(parts) == 3:
+                    param_name = parts[1].strip().split(" ")[1]
+                    param_description = parts[2].strip()
+                    param_descriptions[param_name] = param_description
+
     parameters = {}
     for param_name, param in signature.parameters.items():
         if param_name not in partial_args:
@@ -102,7 +115,10 @@ def function_to_schema(func: Callable[..., Any]) -> dict:
                 raise KeyError(
                     f"Unknown type annotation {param.annotation} for parameter {param.name}: {str(e)}"
                 )
-            parameters[param_name] = {"type": param_type}
+            parameters[param_name] = {
+                "type": param_type,
+                "description": param_descriptions.get(param_name, "")
+            }
 
     required = [
         param_name
@@ -114,7 +130,7 @@ def function_to_schema(func: Callable[..., Any]) -> dict:
         "type": "function",
         "function": {
             "name": original_func.__name__,
-            "description": (original_func.__doc__ or "").strip(),
+            "description": docstring.strip(),
             "parameters": {
                 "type": "object",
                 "properties": parameters,
