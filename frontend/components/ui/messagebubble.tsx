@@ -17,16 +17,18 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({author, attachment, conten
                         <AvatarImage src="/placeholder-user.jpg" alt="User Avatar"/>
                         <AvatarFallback>{author}</AvatarFallback>
                     </Avatar>
-                    {
-                        content && (
-                            <div className="bg-card rounded-lg p-3 max-w-[70%] border">
-                                <p className="text-sm text-card-foreground">{content}</p>
-                            </div>
-                        )
-                    }
-                    {attachment && (
-                        <VegaChart spec={attachment}/>
-                    )}
+                    <div className="message-ai-content flex flex-col space-y-4 border p-4 max-w-[70%] rounded-lg">
+                        {
+                            content && (
+                                <div className="bg-card">
+                                    <p className="text-sm text-card-foreground">{content}</p>
+                                </div>
+                            )
+                        }
+                        {attachment && (
+                            <VegaChart spec={attachment}/>
+                        )}
+                    </div>
                 </>
             ) : ( // Show user avatar on the right
                 <>

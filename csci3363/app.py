@@ -12,7 +12,7 @@ from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from openai import OpenAI, BadRequestError
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from starlette import status
 from starlette.responses import FileResponse, JSONResponse
 
@@ -170,7 +170,7 @@ async def query_data(request: QueryDataRequest):
 
 class QueryDataV2Response(BaseModel):
     text: str
-    vega: Optional[dict]
+    vega: Optional[dict] = Field(default=None)
 
 
 @app.post("/query-data-v2", response_model=QueryDataV2Response)
@@ -194,7 +194,7 @@ async def query_data_v2(request: QueryDataRequest):
         "execute_sql_query": execute_sql,
         "visualize_result_in_vega": visualize_result
     }
-    result = query(client, request.prompt, analyze_sys_prompt, tools, tool_map, max_iterations=3)
+    result = query(client, request.prompt, analyze_sys_prompt, tools, tool_map, max_iterations=5)
     if not result:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="No response from AI")
 

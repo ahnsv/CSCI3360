@@ -48,9 +48,9 @@ export default function Room({contextData}: RoomProps) {
 
     useEffect(() => {
         const lastMessage = messages[messages.length - 1]
+        const isQueryData = lastMessage?.content?.startsWith("/query")
         const getAIResponse = async () => {
-            const isQueryData = lastMessage?.content?.startsWith("/query")
-            const url = `${API_ENDPOINT}/${isQueryData ? 'query-data' : 'query'}`
+            const url = `${API_ENDPOINT}/${isQueryData ? 'query-data-v2' : 'query'}`
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
@@ -69,12 +69,18 @@ export default function Room({contextData}: RoomProps) {
         }
         setLoading(true)
         getAIResponse().then((aiResponse) => {
-            if (!aiResponse?.response) {
+            if (isQueryData) {
+                setMessages(
+                    messages => [...messages, {
+                        author: 'AI',
+                        content: aiResponse?.text,
+                        attachment: aiResponse?.vega as TopLevelSpec
+                    }]
+                )
                 setLoading(false)
                 return
             }
-            setLoading(false)
-            const response = aiResponse.response
+            const response = aiResponse?.response
             if (response instanceof Object) {
                 if (response?.error) {
                     setMessages(
@@ -101,6 +107,7 @@ export default function Room({contextData}: RoomProps) {
                     content: 'I didn\'t get that. Could you try again?'
                 } : {author: 'AI', content: aiResponse.response},
             ])
+            setLoading(false)
         }).catch(() => {
             setLoading(false)
             setMessages((messages) => [
@@ -124,7 +131,7 @@ export default function Room({contextData}: RoomProps) {
 
     const MessageContent = () => {
         return (
-            <>
+            <div className="message-content flex flex-col space-y-4">
                 {
                     messages.map((message, index) => (
                         <MessageBubble {...message} key={index}/>
@@ -133,7 +140,7 @@ export default function Room({contextData}: RoomProps) {
                 {
                     loading && <MessageSkeleton/>
                 }
-            </>
+            </div>
         )
     }
 
