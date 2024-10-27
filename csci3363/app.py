@@ -1,6 +1,8 @@
 import csv
 import json
 import os
+from functools import partial
+
 import pandas as pd
 from io import StringIO
 
@@ -12,6 +14,9 @@ from openai import OpenAI, BadRequestError
 from pydantic import BaseModel
 from starlette import status
 from starlette.responses import FileResponse, JSONResponse
+
+from csci3363.ai.tools import execute_sql_query, visualize_result_in_vega
+from csci3363.ai.utils import query, function_to_schema
 
 # Load environment variables from .env file
 load_dotenv()
@@ -160,6 +165,33 @@ async def query_data(request: QueryDataRequest):
     response_json = json.loads(chat_completion.choices[0].message.content)
 
     return JSONResponse({'response': response_json})
+
+
+@app.post("/query-data-v2")
+async def query_data_v2(request: QueryDataRequest):
+    if not in_memory_datastore:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No data")
+
+    df = pd.DataFrame(in_memory_datastore)
+    columns = df.columns
+    types = df.dtypes.apply(lambda x: str(x)).to_dict()
+    sample = df.head(10).to_dict(orient="records")
+
+    analyze_sys_prompt = open('csci3363/prompts/analyze_v2.txt').read()
+    analyze_sys_prompt = analyze_sys_prompt % (columns, types, sample, request.prompt)
+
+    execute_sql = partial(execute_sql_query, data=in_memory_datastore)
+    visualize_result = partial(visualize_result_in_vega, client=client)
+    tools = [function_to_schema(execute_sql), function_to_schema(visualize_result)]
+    tool_map = {
+        "execute_sql_query": execute_sql,
+        "visualize_result_in_vega": visualize_result
+    }
+    result = query(client, request.prompt, analyze_sys_prompt, tools, tool_map)
+    if not result:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="No response from AI")
+
+    return JSONResponse({'response': result})
 
 
 @app.post('/clear')
