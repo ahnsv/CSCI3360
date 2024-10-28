@@ -33,9 +33,11 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({author, attachment, conten
                 </>
             ) : ( // Show user avatar on the right
                 <>
-                    <div className="bg-card rounded-lg p-3 max-w-[70%] border">
-                        <p className="text-sm text-card-foreground">
-                            {content?.includes('/query') && <Sparkles className="inline-block ml-2"/>}
+                    <div className="bg-card rounded-lg p-3 max-w-[70%] border transition-opacity ease-in-out delay-150 duration-300">
+                        <p className={`text-sm text-card-foreground ${
+                            content?.includes('/query') && 'text-primary font-bold'
+                        }`}>
+                            {content?.includes('/query') && <Sparkles className="inline-block"/>}
                             {content?.replace('/query', '')}
                         </p>
                     </div>
