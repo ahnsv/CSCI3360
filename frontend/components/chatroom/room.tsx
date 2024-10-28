@@ -30,6 +30,8 @@ export default function Room({contextData}: RoomProps) {
     const [input, setInput] = useState('')
     const [loading, setLoading] = useState(false)
     const [showUploader, setShowUploader] = useState(false)
+    // use ref to scroll to the bottom of the chat
+    const messagesEndRef = React.useRef<HTMLDivElement>(null)
 
     const handleSend = () => {
         if (input.trim() === '') return
@@ -47,6 +49,9 @@ export default function Room({contextData}: RoomProps) {
     }, [contextData]);
 
     useEffect(() => {
+        if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({behavior: "smooth", block: "end"});
+        }
         const lastMessage = messages[messages.length - 1]
         const isQueryData = lastMessage?.content?.startsWith("/query")
         const getAIResponse = async () => {
@@ -131,22 +136,25 @@ export default function Room({contextData}: RoomProps) {
 
     const MessageContent = () => {
         return (
-            <div className="message-content flex flex-col space-y-4">
-                {
-                    messages.map((message, index) => (
-                        <MessageBubble {...message} key={index}/>
-                    ))
-                }
-                {
-                    loading && <MessageSkeleton/>
-                }
-            </div>
+            <>
+                <div className="message-content flex flex-col space-y-4">
+                    {
+                        messages.map((message, index) => (
+                            <MessageBubble {...message} key={index}/>
+                        ))
+                    }
+                    {
+                        loading && <MessageSkeleton/>
+                    }
+                </div>
+                <div ref={messagesEndRef}></div>
+            </>
         )
     }
 
 
     return (
-        <div className="flex flex-col h-screen max-w-full mx-auto">
+        <div className="flex flex-col h-screen max-w-full mx-auto" ref={messagesEndRef}>
             <div className="flex items-center justify-between p-4 bg-background rounded-t-lg shadow-sm">
                 <h1 className="text-lg font-bold text-card-foreground">CSCI3360 Chatroom Demo</h1>
                 <div className="actions space-x-1">
@@ -163,7 +171,7 @@ export default function Room({contextData}: RoomProps) {
                 </AlertDescription>
             </Alert>
             <CSVUploader show={showUploader} samples={contextData}/>
-            <div className="flex-1 overflow-auto p-4 space-y-4">
+            <div className="flex-1 p-4 space-y-4">
                 <MessageContent/>
             </div>
             <div className="flex items-start gap-2 p-4 bg-background rounded-lg shadow-sm">

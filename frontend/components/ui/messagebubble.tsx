@@ -14,7 +14,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({author, attachment, conten
             {author === 'AI' ? ( // Show AI avatar on the left
                 <>
                     <Avatar className="w-8 h-8 border">
-                        <AvatarImage src="/placeholder-user.jpg" alt="User Avatar"/>
+                        <AvatarImage alt="User Avatar"/>
                         <AvatarFallback>{author}</AvatarFallback>
                     </Avatar>
                     <div className="message-ai-content flex flex-col space-y-4 border p-4 max-w-[70%] rounded-lg">
@@ -36,7 +36,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({author, attachment, conten
                         <p className="text-sm text-card-foreground">{content}</p>
                     </div>
                     <Avatar className="w-8 h-8 border">
-                        <AvatarImage src="/placeholder-user.jpg" alt="User Avatar"/>
+                        <AvatarImage alt="User Avatar"/>
                         <AvatarFallback>{author}</AvatarFallback>
                     </Avatar>
                 </>
