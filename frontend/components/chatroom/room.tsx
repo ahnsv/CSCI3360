@@ -47,7 +47,7 @@ export default function Room({contextData}: RoomProps) {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({prompt: lastMessage.content}),
-            signal: AbortSignal.timeout(30000),
+            signal: AbortSignal.timeout(60000),
         });
         if (!response.ok) throw new Error("Cannot get api response");
         return await response.json();
