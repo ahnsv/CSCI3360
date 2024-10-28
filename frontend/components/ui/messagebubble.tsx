@@ -2,6 +2,7 @@ import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import VegaChart from "@/components/ui/vegachart";
 import React from "react";
 import {TopLevelSpec} from "vega-lite";
+import {Sparkles} from "lucide-react";
 
 type MessageBubbleProps = {
     author: string
@@ -33,14 +34,16 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({author, attachment, conten
             ) : ( // Show user avatar on the right
                 <>
                     <div className="bg-card rounded-lg p-3 max-w-[70%] border">
-                        <p className="text-sm text-card-foreground">{content}</p>
+                        <p className="text-sm text-card-foreground">
+                            {content?.includes('/query') && <Sparkles className="inline-block ml-2"/>}
+                            {content?.replace('/query', '')}
+                        </p>
                     </div>
                     <Avatar className="w-8 h-8 border">
                         <AvatarImage alt="User Avatar"/>
                         <AvatarFallback>{author}</AvatarFallback>
                     </Avatar>
-                </>
-            )
+                </>)
             }
         </div>
     )
