@@ -36,9 +36,11 @@ export default function Room({contextData}: RoomProps) {
         if (input.trim() === '') return;
         setMessages((messages) => [...messages, {author: 'Me', content: input}]);
         setInput('');
-        if (messagesEndRef.current) {
-            messagesEndRef.current.scrollTo({top: messagesEndRef.current.scrollHeight, behavior: 'smooth'});
-        }
+        setTimeout(() => {
+            if (messagesEndRef.current) {
+                messagesEndRef.current.scrollTo({top: messagesEndRef.current.scrollHeight, behavior: 'smooth'});
+            }
+        }, 0);
     };
 
     const getAIResponse = async (lastMessage: Message, isQueryData: boolean) => {
@@ -67,18 +69,22 @@ export default function Room({contextData}: RoomProps) {
 
             setMessages((messages) => [...messages, newMessage]);
             setLoading(false);
-            if (messagesEndRef.current) {
-                messagesEndRef.current.scrollTo({top: messagesEndRef.current.scrollHeight, behavior: 'smooth'});
-            }
+            setTimeout(() => {
+                if (messagesEndRef.current) {
+                    messagesEndRef.current.scrollTo({top: messagesEndRef.current.scrollHeight, behavior: 'smooth'});
+                }
+            }, 0);
         }).catch(() => {
             setLoading(false);
             setMessages((messages) => [...messages, {
                 author: 'AI',
                 content: 'I didn\'t get that. Could you try again?'
             }]);
-            if (messagesEndRef.current) {
-                messagesEndRef.current.scrollTo({top: messagesEndRef.current.scrollHeight, behavior: 'smooth'});
-            }
+            setTimeout(() => {
+                if (messagesEndRef.current) {
+                    messagesEndRef.current.scrollTo({top: messagesEndRef.current.scrollHeight, behavior: 'smooth'});
+                }
+            }, 0);
         });
 
     }, [messages]);
