@@ -108,7 +108,7 @@ export default function Room({contextData}: RoomProps) {
                 <AlertDescription className="font-bold">Use `/query` command to talk about data you
                     upload.</AlertDescription>
             </Alert>
-            <CSVUploader show={showUploader} samples={contextData}/>
+            <CSVUploader show={showUploader} samples={contextData} close={() => setShowUploader(false)}/>
             <div className="flex-1 p-4 overflow-y-auto space-y-4" ref={messagesEndRef}>
                 <div className="message-content flex flex-col space-y-4">
                     {messages.map((message, index) => <MessageBubble {...message} key={index}/>)}

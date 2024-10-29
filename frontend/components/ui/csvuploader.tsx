@@ -2,7 +2,7 @@
 
 import {useState, useCallback} from 'react'
 import {useDropzone, DropzoneOptions} from 'react-dropzone'
-import {Upload, FileText, AlertCircle, ChevronDown, ChevronUp} from 'lucide-react'
+import {Upload, FileText, AlertCircle, ChevronDown, ChevronUp, X} from 'lucide-react'
 import {Button} from "@/components/ui/button"
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table"
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert"
@@ -34,9 +34,10 @@ const uploadFileAndGetCurrentData = async (file: File) => {
 
 type CSVUploaderProps = {
     show: boolean;
-    samples: unknown[]
+    samples: unknown[];
+    close: () => void;
 }
-export default function CSVUploader({show, samples}: CSVUploaderProps) {
+export default function CSVUploader({show, samples, close}: CSVUploaderProps) {
     const [preview, setPreview] = useState<any[] | null>(samples)
     const [error, setError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
@@ -101,7 +102,10 @@ export default function CSVUploader({show, samples}: CSVUploaderProps) {
     }
 
     return (
-        <div className="max-w-4xl mx-auto p-4">
+        <div className="max-w-4xl mx-auto p-4 relative">
+            <button onClick={close} className="absolute top-0 right-0 m-4 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                <X className="h-4 w-4"/>
+            </button>
             <div
                 {...getRootProps()}
                 className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
@@ -133,7 +137,7 @@ export default function CSVUploader({show, samples}: CSVUploaderProps) {
                 </Alert>
             )}
 
-            {preview && (
+            {preview && preview.length > 1 && (
                 <div className="mt-8 flex flex-col mx-auto">
                     <p className={`tracking-tighter my-4 mx-auto font-bold`}>
                         There is an existing data. <br />
